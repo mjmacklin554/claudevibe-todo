@@ -1,2 +1,112 @@
-<h1>Welcome to my Calendar</h1>
-<p>Daily Planner - Michael Macklin</p>
+{% extends 'base.html' %}
+
+{% block title %}Home - Taskflow{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar-day {
+        height: 80px;
+        border: 1px solid #dee2e6;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .calendar-day:hover {
+        background-color: #f8f9fa;
+    }
+    .calendar-day.today {
+        background-color: #007bff;
+        color: white;
+    }
+    .calendar-day.today:hover {
+        background-color: #0056b3;
+    }
+    .calendar-day.other-month {
+        color: #6c757d;
+        background-color: #f8f9fa;
+    }
+    .calendar-header {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-outline-primary">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                        <h3 class="mb-0">{{ month_name }} {{ year }}</h3>
+                        <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-outline-primary">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead>
+                                    <tr class="calendar-header">
+                                        <th class="text-center py-2">Monday</th>
+                                        <th class="text-center py-2">Tuesday</th>
+                                        <th class="text-center py-2">Wednesday</th>
+                                        <th class="text-center py-2">Thursday</th>
+                                        <th class="text-center py-2">Friday</th>
+                                        <th class="text-center py-2">Saturday</th>
+                                        <th class="text-center py-2">Sunday</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for week in calendar %}
+                                        <tr>
+                                            {% for day in week %}
+                                                <td class="p-0">
+                                                    {% if day != 0 %}
+                                                        <a href="{% url 'daily_tasks' year month day %}"
+                                                           class="calendar-day d-flex align-items-start justify-content-start p-2 text-decoration-none
+                                                           {% if day == today.day and month == today.month and year == today.year %}today{% endif %}"
+                                                           style="color: inherit;">
+                                                            <span class="fw-bold">{{ day }}</span>
+                                                        </a>
+                                                    {% else %}
+                                                        <div class="calendar-day other-month"></div>
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-primary bg-opacity-10">
+                    <div class="card-body text-center">
+                        <h4 class="card-title">Welcome to Taskflow, {{ user.username }}!</h4>
+                        <p class="card-text">Click on any day in the calendar above to manage your tasks for that day.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-primary bg-opacity-10">
+                    <div class="card-body">
+                        <h1 class="card-title">Welcome to Taskflow</h1>
+                        <p class="card-text">Your personal task management system</p>
+                        <p class="card-text">Please <a href="{% url 'login' %}" class="link-primary">login</a> or <a href="{% url 'register' %}" class="link-primary">create an account</a> to get started.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
