@@ -2,53 +2,31 @@
 
 {% block title %}{{ formatted_date }} - Taskflow{% endblock %}
 
-{% block extra_css %}
-<style>
-    .time-slot {
-        border-left: 4px solid #dee2e6;
-        transition: border-color 0.2s;
-    }
-    .time-slot:hover {
-        border-left-color: #007bff;
-    }
-    .time-slot.has-task {
-        border-left-color: #28a745;
-    }
-    .time-slot.completed {
-        border-left-color: #6c757d;
-        background-color: #f8f9fa;
-    }
-    .priority-high {
-        border-left-color: #dc3545 !important;
-    }
-    .priority-medium {
-        border-left-color: #ffc107 !important;
-    }
-    .priority-low {
-        border-left-color: #28a745 !important;
-    }
-    .task-form {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-    }
-    .time-label {
-        min-width: 80px;
-        font-weight: 500;
-        color: #495057;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-    <div class="row mb-4">
+    <div class="row mb-3 mb-md-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+            <!-- Desktop Header -->
+            <div class="d-none d-md-flex justify-content-between align-items-center">
                 <a href="{% url 'home' %}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Back to Calendar
                 </a>
                 <h2 class="mb-0">{{ formatted_date }}</h2>
                 <div class="text-muted">
                     <small>Click on any time slot to add or edit tasks</small>
+                </div>
+            </div>
+
+            <!-- Mobile Header -->
+            <div class="d-md-none">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <h5 class="mb-0 text-center flex-grow-1">{{ formatted_date }}</h5>
+                    <div style="width: 60px;"></div>
+                </div>
+                <div class="text-center text-muted">
+                    <small>Tap time slots to add tasks</small>
                 </div>
             </div>
         </div>
@@ -113,14 +91,14 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="hour" value="{{ slot.hour }}">
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
+                                    <div class="row g-2 g-md-3">
+                                        <div class="col-12 col-md-6">
                                             <label class="form-label">Task Title</label>
                                             <input type="text" class="form-control" name="title"
                                                    value="{{ slot.task.title|default:'' }}"
                                                    placeholder="Enter task title">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-6 col-md-3">
                                             <label class="form-label">Priority</label>
                                             <select class="form-select" name="priority">
                                                 <option value="low" {% if slot.task.priority == 'low' %}selected{% endif %}>Low</option>
@@ -128,9 +106,9 @@
                                                 <option value="high" {% if slot.task.priority == 'high' %}selected{% endif %}>High</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-6 col-md-3">
                                             <label class="form-label">Status</label>
-                                            <div class="form-check form-switch">
+                                            <div class="form-check form-switch mt-2">
                                                 <input class="form-check-input" type="checkbox" name="completed"
                                                        {% if slot.task.completed %}checked{% endif %}>
                                                 <label class="form-check-label">Completed</label>
@@ -144,19 +122,26 @@
                                                   placeholder="Add task details...">{{ slot.task.description|default:'' }}</textarea>
                                     </div>
 
-                                    <div class="mt-3 d-flex gap-2">
-                                        <button type="submit" class="btn btn-success btn-sm">
-                                            <i class="bi bi-check"></i> Save
-                                        </button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEdit({{ slot.hour }})">
-                                            Cancel
-                                        </button>
-                                        {% if slot.task %}
-                                            <button type="submit" class="btn btn-outline-danger btn-sm ms-auto"
-                                                    onclick="return confirm('Delete this task?')" name="title" value="">
-                                                <i class="bi bi-trash"></i> Delete
+                                    <div class="mt-3">
+                                        <div class="d-flex flex-column flex-sm-row gap-2">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check"></i>
+                                                <span class="d-none d-sm-inline">Save</span>
+                                                <span class="d-sm-none">Save</span>
                                             </button>
-                                        {% endif %}
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEdit({{ slot.hour }})">
+                                                <span class="d-none d-sm-inline">Cancel</span>
+                                                <span class="d-sm-none">Cancel</span>
+                                            </button>
+                                            {% if slot.task %}
+                                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                        onclick="return confirm('Delete this task?')" name="title" value="">
+                                                    <i class="bi bi-trash"></i>
+                                                    <span class="d-none d-sm-inline">Delete</span>
+                                                    <span class="d-sm-none">Delete</span>
+                                                </button>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -166,40 +151,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function editTask(hour) {
-    // Hide all other edit forms
-    document.querySelectorAll('[id^="edit-form-"]').forEach(form => {
-        if (form.id !== `edit-form-${hour}`) {
-            form.style.display = 'none';
-        }
-    });
-
-    // Show the selected form
-    const form = document.getElementById(`edit-form-${hour}`);
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-
-    // Focus on the title input
-    if (form.style.display === 'block') {
-        const titleInput = form.querySelector('input[name="title"]');
-        titleInput.focus();
-    }
-}
-
-function cancelEdit(hour) {
-    document.getElementById(`edit-form-${hour}`).style.display = 'none';
-}
-
-// Close edit forms when clicking outside
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.task-form') && !event.target.closest('button')) {
-        document.querySelectorAll('[id^="edit-form-"]').forEach(form => {
-            form.style.display = 'none';
-        });
-    }
-});
-</script>
 {% endblock %}

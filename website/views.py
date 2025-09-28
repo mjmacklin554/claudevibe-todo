@@ -1,11 +1,32 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django import forms
+from django.contrib.auth.models import User
 import calendar
 from datetime import datetime, date
 from django.utils import timezone
+
+class UserProfileForm(forms.ModelForm):
+	email = forms.EmailField(required=True)
+
+	class Meta:
+		model = User
+		fields = ['username', 'first_name', 'last_name', 'email']
+
+	def clean_email(self):
+		email = self.cleaned_data.get('email')
+		if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+			raise forms.ValidationError("A user with this email already exists.")
+		return email
+
+	def clean_username(self):
+		username = self.cleaned_data.get('username')
+		if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+			raise forms.ValidationError("A user with this username already exists.")
+		return username
 
 def home(request):
 	context = {}
@@ -154,3 +175,40 @@ def daily_tasks(request, year, month, day):
 		'day': day,
 	}
 	return render(request, 'daily_tasks.html', context)
+
+@login_required
+def profile_view(request):
+	if request.method == 'POST':
+		form_type = request.POST.get('form_type')
+
+		if form_type == 'profile':
+			profile_form = UserProfileForm(request.POST, instance=request.user)
+			password_form = PasswordChangeForm(request.user)
+
+			if profile_form.is_valid():
+				profile_form.save()
+				messages.success(request, 'Profile updated successfully!')
+				return redirect('profile')
+			else:
+				messages.error(request, 'Please correct the errors below.')
+
+		elif form_type == 'password':
+			profile_form = UserProfileForm(instance=request.user)
+			password_form = PasswordChangeForm(request.user, request.POST)
+
+			if password_form.is_valid():
+				user = password_form.save()
+				update_session_auth_hash(request, user)  # Keep user logged in after password change
+				messages.success(request, 'Password changed successfully!')
+				return redirect('profile')
+			else:
+				messages.error(request, 'Please correct the password errors below.')
+	else:
+		profile_form = UserProfileForm(instance=request.user)
+		password_form = PasswordChangeForm(request.user)
+
+	context = {
+		'profile_form': profile_form,
+		'password_form': password_form,
+	}
+	return render(request, 'profile.html', context)

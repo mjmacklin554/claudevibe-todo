@@ -2,41 +2,13 @@
 
 {% block title %}Home - Taskflow{% endblock %}
 
-{% block extra_css %}
-<style>
-    .calendar-day {
-        height: 80px;
-        border: 1px solid #dee2e6;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .calendar-day:hover {
-        background-color: #f8f9fa;
-    }
-    .calendar-day.today {
-        background-color: #007bff;
-        color: white;
-    }
-    .calendar-day.today:hover {
-        background-color: #0056b3;
-    }
-    .calendar-day.other-month {
-        color: #6c757d;
-        background-color: #f8f9fa;
-    }
-    .calendar-header {
-        background-color: #e9ecef;
-        font-weight: bold;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
     {% if user.is_authenticated %}
-        <div class="row mb-4">
+        <div class="row mb-3 mb-md-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <!-- Desktop Calendar Header -->
+                    <div class="card-header d-none d-md-flex justify-content-between align-items-center desktop-calendar-header">
                         <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-outline-primary">
                             <i class="bi bi-chevron-left"></i> Previous
                         </a>
@@ -45,18 +17,52 @@
                             Next <i class="bi bi-chevron-right"></i>
                         </a>
                     </div>
+
+                    <!-- Mobile Calendar Header -->
+                    <div class="card-header d-md-none">
+                        <div class="calendar-nav-mobile">
+                            <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                            <h3 class="mb-0">{{ month_name }} {{ year }}</h3>
+                            <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-bordered mb-0">
                                 <thead>
                                     <tr class="calendar-header">
-                                        <th class="text-center py-2">Monday</th>
-                                        <th class="text-center py-2">Tuesday</th>
-                                        <th class="text-center py-2">Wednesday</th>
-                                        <th class="text-center py-2">Thursday</th>
-                                        <th class="text-center py-2">Friday</th>
-                                        <th class="text-center py-2">Saturday</th>
-                                        <th class="text-center py-2">Sunday</th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Monday</span>
+                                            <span class="d-sm-none">Mon</span>
+                                        </th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Tuesday</span>
+                                            <span class="d-sm-none">Tue</span>
+                                        </th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Wednesday</span>
+                                            <span class="d-sm-none">Wed</span>
+                                        </th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Thursday</span>
+                                            <span class="d-sm-none">Thu</span>
+                                        </th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Friday</span>
+                                            <span class="d-sm-none">Fri</span>
+                                        </th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Saturday</span>
+                                            <span class="d-sm-none">Sat</span>
+                                        </th>
+                                        <th class="text-center py-1 py-md-2">
+                                            <span class="d-none d-sm-inline">Sunday</span>
+                                            <span class="d-sm-none">Sun</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
